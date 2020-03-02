@@ -1,0 +1,72 @@
+         .MODEL SMALL
+.STACK 100H    
+.DATA
+	string DB 80 DUP ? 
+	MSG DB "ENTER STRING WITH SAME CASE : $"
+	DORDER DB "Result in descending Order: $"
+.CODE   
+    MAIN PROC
+    MOV AX, @DATA
+	MOV DS, AX
+	
+	MOV AH,9
+	LEA DX, MSG
+	INT 21H
+	
+	MOV AH,1
+	MOV SI,0
+	
+INPUT:
+	INT 21H
+	CMP AL,0DH
+	JZ NEXT
+	
+	MOV string[SI], AL
+	
+	INC SI
+    JMP INPUT
+	
+	NEXT:
+	MOV CX, SI
+
+LOOP1:
+	DEC SI
+	MOV DI,SI
+LOOP2:
+    DEC DI
+	MOV BL, string[SI]
+	CMP BL, string[DI]
+	JL NEXT2
+	XCHG BL, string[DI]
+	MOV string[SI],BL
+	
+NEXT2:
+    CMP DI,0
+	JNE LOOP2
+	
+    CMP SI,1
+	JG LOOP1
+	 
+
+	MOV AH, 2
+	MOV DL, 0AH
+	INT 21H
+	MOV DL, 0DH
+	INT 21H
+	
+	MOV AH,9
+	LEA DX,DORDER
+	INT 21H
+
+	MOV DI, 0
+	MOV AH,2
+NEXT3:
+	MOV DL, string[DI]
+	INT 21H
+	INC DI
+	CMP DI,CX
+	JL NEXT3
+	
+	MOV AH,4CH
+	MAIN ENDP
+ END MAIN
